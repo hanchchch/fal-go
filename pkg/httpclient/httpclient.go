@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 type HTTPClient struct {
@@ -16,15 +17,33 @@ type HTTPClient struct {
 
 type HTTPClientOptions struct {
 	BaseUrl string
-	ApiKey  string
+	ApiKey  *string
 }
 
-func NewHTTPClient(options *HTTPClientOptions) *HTTPClient {
+func getApiKey(options *HTTPClientOptions) string {
+	apiKey := ""
+
+	if os.Getenv("FAL_KEY") != "" {
+		apiKey = os.Getenv("FAL_KEY")
+	}
+
+	if options.ApiKey != nil {
+		apiKey = *options.ApiKey
+	}
+
+	return apiKey
+}
+
+func NewHTTPClient(options *HTTPClientOptions) (*HTTPClient, error) {
+	apiKey := getApiKey(options)
+	if apiKey == "" {
+		return nil, fmt.Errorf("failed to initialize http client: api key is required")
+	}
 	return &HTTPClient{
 		client:  &http.Client{},
 		baseUrl: options.BaseUrl,
-		apiKey:  options.ApiKey,
-	}
+		apiKey:  apiKey,
+	}, nil
 }
 
 func (h *HTTPClient) buildUrl(appId string, path string) string {
