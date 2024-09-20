@@ -18,7 +18,7 @@ func main() {
 	}
 
 	res, err := queue.Submit("fal-ai/fast-lightning-sdxl", &queueclient.SubmitOptions{
-		Input: &ModelInput{
+		Input: ModelInput{
 			Prompt: "photo of a girl smiling during a sunset, with lightnings in the background",
 		},
 	})
