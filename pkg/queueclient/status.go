@@ -1,6 +1,10 @@
 package queueclient
 
-import "fmt"
+import (
+	"fmt"
+
+	http "github.com/fal-ai/fal-go/pkg/httpclient"
+)
 
 type RequestLogLevel string
 
@@ -38,35 +42,20 @@ const (
 	QueueStatusInQueue    QueueStatus = "IN_QUEUE"
 )
 
-type InProgressQueueStatus struct {
-	Status      string       `json:"status"`
-	ResponseUrl *string      `json:"response_url,omitempty"`
-	Logs        []RequestLog `json:"logs,omitempty"`
-}
-
-type CompletedQueueStatus struct {
-	Status      string        `json:"-"`
-	ResponseUrl *string       `json:"-"`
-	Logs        *[]RequestLog `json:"-"`
-	Metrics     *Metrics      `json:"metrics,omitempty"`
-}
-
-type EnqueuedQueueStatus struct {
-	Status        string  `json:"-"`
-	ResponseUrl   *string `json:"-"`
-	QueuePosition *int    `json:"queue_position,omitempty"`
-}
-
 // QueueStatusResponse is the response of the status endpoint
 type QueueStatusResponse struct {
-	InProgressQueueStatus
-	EnqueuedQueueStatus
-	CompletedQueueStatus
+	Status      QueueStatus `json:"status"`
+	ResponseUrl string      `json:"response_url"`
+
+	Logs          *[]RequestLog `json:"logs,omitempty"`
+	Metrics       *Metrics      `json:"metrics,omitempty"`
+	QueuePosition *int          `json:"queue_position,omitempty"`
 }
 
 func (q *QueueHTTPClient) Status(appId string, requestId string) (*QueueStatusResponse, error) {
-	res := &QueueStatusResponse{}
-	err := q.httpClient.GetJson(buildUrl(appId, requestId), res)
+	res, err := http.NewJsonHttpRequest[any, QueueStatusResponse](q.httpClient).Get(
+		buildUrl(appId, fmt.Sprintf("requests/%s/status", requestId)),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get queue status: %w", err)
 	}

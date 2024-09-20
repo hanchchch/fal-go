@@ -9,7 +9,7 @@ import (
 const queueApiBaseUrl = "https://queue.fal.run"
 
 type QueueHTTPClient struct {
-	httpClient *httpclient.HTTPClient
+	httpClient *httpclient.HttpClient
 }
 
 type QueueHTTPClientOptions struct {
@@ -21,7 +21,7 @@ func buildUrl(appId string, path string) string {
 }
 
 func NewQueueHTTPClient(options *QueueHTTPClientOptions) (*QueueHTTPClient, error) {
-	httpClient, err := httpclient.NewHTTPClient(&httpclient.HTTPClientOptions{
+	httpClient, err := httpclient.NewHTTPClient(&httpclient.HttpClientOptions{
 		ApiKey: options.ApiKey,
 	})
 	if err != nil {
