@@ -57,21 +57,20 @@ func (h *HTTPClient) Post(appId string, path string, body io.Reader) (*http.Resp
 }
 
 // TODO generic
-func (h *HTTPClient) GetJson(appId string, path string) (interface{}, error) {
+func (h *HTTPClient) GetJson(appId string, path string, jsonRes interface{}) error {
 	res, err := h.Request("GET", appId, path, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
+		return fmt.Errorf("failed to send request: %w", err)
 	}
 	defer res.Body.Close()
 
-	var jsonRes interface{}
 	err = json.NewDecoder(res.Body).Decode(&jsonRes)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return jsonRes, nil
+	return nil
 }
 
 // TODO generic
