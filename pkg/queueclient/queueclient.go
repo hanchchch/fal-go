@@ -16,10 +16,13 @@ type QueueHTTPClientOptions struct {
 	ApiKey *string
 }
 
+func buildUrl(appId string, path string) string {
+	return fmt.Sprintf("%s/%s/%s", queueApiBaseUrl, appId, path)
+}
+
 func NewQueueHTTPClient(options *QueueHTTPClientOptions) (*QueueHTTPClient, error) {
 	httpClient, err := httpclient.NewHTTPClient(&httpclient.HTTPClientOptions{
-		BaseUrl: queueApiBaseUrl,
-		ApiKey:  options.ApiKey,
+		ApiKey: options.ApiKey,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize queue client: %w", err)

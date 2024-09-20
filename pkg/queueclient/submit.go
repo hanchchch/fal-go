@@ -19,7 +19,7 @@ type SubmitResponse struct {
 
 func (q *QueueHTTPClient) Submit(appId string, options SubmitOptions) (*SubmitResponse, error) {
 	res := &SubmitResponse{}
-	err := q.httpClient.PostJson(appId, "submit", options, res)
+	err := q.httpClient.PostJson(buildUrl(appId, "submit"), options, res)
 	if err != nil {
 		return nil, fmt.Errorf("failed to submit queue: %w", err)
 	}
