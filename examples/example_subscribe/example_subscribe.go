@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fal-ai/fal-go/pkg/queueclient"
 )
@@ -22,6 +23,7 @@ func main() {
 				Prompt: "photo of a girl smiling during a sunset, with lightnings in the background",
 			},
 		},
+		Timeout: 1 * time.Second,
 	})
 	if err != nil {
 		panic(err)

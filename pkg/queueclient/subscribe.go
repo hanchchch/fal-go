@@ -1,20 +1,26 @@
 package queueclient
 
 import (
+	"fmt"
 	"time"
 )
 
 const defaultPollingInterval = 500 * time.Millisecond
+const defaultTimeout = 300 * time.Second
 
 type SubscribeOptions struct {
 	SubmitOptions
-	PollingInterval *time.Duration
+	Timeout         time.Duration
+	PollingInterval time.Duration
 }
 
 func (q *QueueHTTPClient) Subscribe(appId string, options *SubscribeOptions) (*any, error) {
-	pollingInterval := defaultPollingInterval
-	if options.PollingInterval != nil {
-		pollingInterval = defaultPollingInterval
+	if options.PollingInterval == 0 {
+		options.PollingInterval = defaultPollingInterval
+	}
+
+	if options.Timeout == 0 {
+		options.Timeout = defaultTimeout
 	}
 
 	res, err := q.Submit(appId, &options.SubmitOptions)
@@ -22,15 +28,22 @@ func (q *QueueHTTPClient) Subscribe(appId string, options *SubscribeOptions) (*a
 		return nil, err
 	}
 
-	for {
-		queueStatus, err := q.Status(appId, res.RequestId)
-		if err != nil {
-			return nil, err
-		}
-		time.Sleep(pollingInterval)
+	for alive := true; alive; {
+		timer := time.NewTimer(options.Timeout)
+		tick := time.NewTicker(options.PollingInterval)
 
-		if queueStatus.Status == QueueStatusCompleted {
-			break
+		select {
+		case <-timer.C:
+			alive = false
+			return nil, fmt.Errorf("timeout exceeded (duration: %v)", options.Timeout.String())
+		case <-tick.C:
+			queueStatus, err := q.Status(appId, res.RequestId)
+			if err != nil {
+				return nil, err
+			} else if queueStatus.Status == QueueStatusCompleted {
+				timer.Stop()
+				alive = false
+			}
 		}
 	}
 
