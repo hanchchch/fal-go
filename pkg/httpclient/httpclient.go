@@ -17,6 +17,12 @@ type HttpClientOptions struct {
 	ApiKey *string
 }
 
+type RequestOptions struct {
+	Headers map[string]string
+	Query   map[string]string
+	Body    *io.Reader
+}
+
 func getApiKey(options *HttpClientOptions) string {
 	apiKey := ""
 
@@ -31,6 +37,17 @@ func getApiKey(options *HttpClientOptions) string {
 	return apiKey
 }
 
+func appendQuery(url string, query map[string]string) string {
+	if query != nil {
+		url = fmt.Sprintf("%s?", url)
+		for key, value := range query {
+			url = fmt.Sprintf("%s%s=%s&", url, key, value)
+		}
+		url = url[:len(url)-1]
+	}
+	return url
+}
+
 func NewHTTPClient(options *HttpClientOptions) (*HttpClient, error) {
 	apiKey := getApiKey(options)
 	if apiKey == "" {
@@ -42,14 +59,19 @@ func NewHTTPClient(options *HttpClientOptions) (*HttpClient, error) {
 	}, nil
 }
 
-func (h *HttpClient) Request(method string, url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	req, err := http.NewRequest(method, url, body)
+func (h *HttpClient) Request(method string, url string, options *RequestOptions) (*http.Response, error) {
+	processedUrl := url
+	if options.Query != nil {
+		processedUrl = appendQuery(url, options.Query)
+	}
+
+	req, err := http.NewRequest(method, processedUrl, *options.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Add("Authorization", fmt.Sprintf("Key %s", h.apiKey))
-	for key, value := range headers {
+	for key, value := range options.Headers {
 		req.Header.Add(key, value)
 	}
 

@@ -10,6 +10,7 @@ import (
 func (q *QueueHTTPClient) Result(appId string, requestId string) (*any, error) {
 	res, err := http.NewJsonHttpRequest[any, any](q.httpClient).Get(
 		buildUrl(appId, fmt.Sprintf("requests/%s", requestId)),
+		&http.JsonHttpRequestOptions[any]{},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get queue result: %w", err)

@@ -55,6 +55,7 @@ type QueueStatusResponse struct {
 func (q *QueueHTTPClient) Status(appId string, requestId string) (*QueueStatusResponse, error) {
 	res, err := http.NewJsonHttpRequest[any, QueueStatusResponse](q.httpClient).Get(
 		buildUrl(appId, fmt.Sprintf("requests/%s/status", requestId)),
+		&http.JsonHttpRequestOptions[any]{},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get queue status: %w", err)

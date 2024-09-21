@@ -5,18 +5,18 @@ import (
 	"time"
 )
 
-const defaultPollingInterval = 500 * time.Millisecond
+const defaultPollInterval = 500 * time.Millisecond
 const defaultTimeout = 300 * time.Second
 
 type SubscribeOptions struct {
 	SubmitOptions
-	Timeout         time.Duration
-	PollingInterval time.Duration
+	Timeout      time.Duration
+	PollInterval time.Duration
 }
 
 func (q *QueueHTTPClient) Subscribe(appId string, options *SubscribeOptions) (*any, error) {
-	if options.PollingInterval == 0 {
-		options.PollingInterval = defaultPollingInterval
+	if options.PollInterval == 0 {
+		options.PollInterval = defaultPollInterval
 	}
 
 	if options.Timeout == 0 {
@@ -30,7 +30,7 @@ func (q *QueueHTTPClient) Subscribe(appId string, options *SubscribeOptions) (*a
 
 	for alive := true; alive; {
 		timer := time.NewTimer(options.Timeout)
-		tick := time.NewTicker(options.PollingInterval)
+		tick := time.NewTicker(options.PollInterval)
 
 		select {
 		case <-timer.C:

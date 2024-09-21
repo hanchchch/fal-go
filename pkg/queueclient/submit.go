@@ -21,9 +21,19 @@ type SubmitResponse struct {
 }
 
 func (q *QueueHTTPClient) Submit(appId string, options *SubmitOptions) (*SubmitResponse, error) {
+	reqOptions := &http.JsonHttpRequestOptions[interface{}]{
+		Body: &options.Input,
+	}
+
+	if options.WebhookUrl != "" {
+		reqOptions.Query = map[string]string{
+			"fal_webhook": options.WebhookUrl,
+		}
+	}
+
 	res, err := http.NewJsonHttpRequest[interface{}, SubmitResponse](q.httpClient).Post(
 		buildUrl(appId, ""),
-		&options.Input,
+		reqOptions,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to submit queue: %w", err)

@@ -9,7 +9,7 @@ import (
 func (q *QueueHTTPClient) Cancel(appId string, requestId string) error {
 	_, err := http.NewJsonHttpRequest[any, any](q.httpClient).Put(
 		buildUrl(appId, fmt.Sprintf("requests/%s/cancel", requestId)),
-		nil,
+		&http.JsonHttpRequestOptions[any]{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to get queue status: %w", err)
